@@ -5,6 +5,8 @@
 /* Kenneth C. Louden                                */
 /****************************************************/
 
+const fs = require('fs');
+
 #include "globals.h"
 
 /* set NO_PARSE to TRUE to get a scanner-only compiler */

@@ -5,7 +5,17 @@
 /* Kenneth C. Louden                                */
 /****************************************************/
 
+// Include process module
+const process = require('process');
+// https://www.geeksforgeeks.org/node-js-process-argv-property/ 
+ const fs = require('fs');
+// https://nodejs.org/api/fs.html 
+// https://www.w3schools.com/nodejs/nodejs_filesystem.asp 
+
 const globals = require("./globals.js");
+const { TRUE, FALSE } = require("./globals.js");
+const { MAXTOKENLEN } = require("./scanHeader.js");
+let { source, listing, code, lineno,  } = require("./globals.js");
 
 
 /* set NO_PARSE to TRUE to get a scanner-only compiler */
@@ -19,74 +29,85 @@ const NO_ANALYZE = TRUE;
  */
 const NO_CODE = TRUE;
 
-const scan = require("./scan.js");
-
 /* allocate global variables */
-const lineno = 0;
-let source;
-let listing;
-let code;
-a
+const toSCreen = 0;
+lineno = 0;
+
 /* allocate and set tracing flags */
-const EchoSource = FALSE;
-const TraceScan = FALSE;
-const TraceParse = FALSE;
-const TraceAnalyze = FALSE;
-const TraceCode = FALSE;
+globals.EchoSource = FALSE;
+globals.TraceScan = FALSE;
+globals.TraceParse = FALSE;
+globals.TraceAnalyze = FALSE;
+globals.TraceCode = FALSE;
 
-const Error = FALSE;
+globals.Error = FALSE;
 
-function main( argc, argv )
+function main( )
 { let syntaxTree;
   let pgm; /* source code file name */
-  if (argc != 2)
-    { fprintf(stderr,"usage: %s <filename>\n",argv[0]);
-      exit(1);
+  const args = process.argv;
+  if (args.length !== 2)
+    { console.log(`usage: ${args[0]} <filename>`);
+      process.exit(1);
     }
-  strcpy(pgm,argv[1]) ;
-  if (strchr (pgm, '.') == NULL)
-     strcat(pgm,".tny");
-  source = fopen(pgm,"r");
-  if (source==NULL)
-  { fprintf(stderr,"File %s not found\n",pgm);
-    exit(1);
+  pgm = args[1];
+  if (!(/\./.test(pgm))) {
+     pgm += ".tny";
   }
-  listing = stdout; /* send listing to screen */
-  fprintf(listing,"\nTINY COMPILATION: %s\n",pgm);
-#if NO_PARSE
-  while (getToken()!=ENDFILE);
-#else
-  syntaxTree = parse();
-  if (TraceParse) {
-    fprintf(listing,"\nSyntax tree:\n");
-    printTree(syntaxTree);
+  fs.open(pgm, "r", function (err, source) {
+            if (err) { 
+                    console.log(`File ${pgm} not found`);
+                    process.exit(1);
+            }
+                                            });
+
+  listing = toSCreen; /* send listing to screen */
+  console.log(`\nTINY COMPILATION: ${pgm}`);
+  if (NO_PARSE) {
+          while (getToken()!=ENDFILE)
+                ;
+  } else {
+          syntaxTree = parse();
+          if (TraceParse) {
+                console.log("\nSyntax tree:");
+                printTree(syntaxTree);
+          }
+
+          if (! NO_ANALYZE) {
+                if (! Error) {
+                    if (TraceAnalyze) {
+                                        console.log("\nBuilding Symbol Table...");
+                    }
+                    buildSymtab(syntaxTree);
+
+                    if (TraceAnalyze) { 
+                                        console.log("\nChecking Types...");
+                    }
+                    typeCheck(syntaxTree);
+
+                    if (TraceAnalyze) {
+                                        console.log("\nType Checking Finished");
+                    }
+                }
+
+                if (! NO_CODE) {
+                        if (! Error) {
+                                const fnlen = pgm.indexOf(".");
+                                const codefile = pgm.substring(0,fnlen) + ".tm";
+                                fs.open(codefile, "w", function (err, code) {
+                                    if (err) { 
+                                        console.log(`Unable to open ${codefile}`);
+                                        process.exit(1);
+                                    }
+                                });
+
+                                codeGen(syntaxTree,codefile);
+                                fs.close(code);
+                        }
+                }
+            }
   }
-#if !NO_ANALYZE
-  if (! Error)
-  { if (TraceAnalyze) fprintf(listing,"\nBuilding Symbol Table...\n");
-    buildSymtab(syntaxTree);
-    if (TraceAnalyze) fprintf(listing,"\nChecking Types...\n");
-    typeCheck(syntaxTree);
-    if (TraceAnalyze) fprintf(listing,"\nType Checking Finished\n");
-  }
-#if !NO_CODE
-  if (! Error)
-  { char * codefile;
-    int fnlen = strcspn(pgm,".");
-    codefile = (char *) calloc(fnlen+4, sizeof(char));
-    strncpy(codefile,pgm,fnlen);
-    strcat(codefile,".tm");
-    code = fopen(codefile,"w");
-    if (code == NULL)
-    { printf("Unable to open %s\n",codefile);
-      exit(1);
-    }
-    codeGen(syntaxTree,codefile);
-    fclose(code);
-  }
-#endif
-#endif
-#endif
+
   fclose(source);
   return 0;
 }

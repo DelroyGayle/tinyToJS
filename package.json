@@ -1,0 +1,27 @@
+{
+  "name": "tiny",
+  "version": "1.0.0",
+  "description": "TINY compiler using JavaScript",
+  "main": "tiny.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DelroyGayle/tinyToJS.git"
+  },
+  "keywords": [
+    "tiny",
+    "tm",
+    "kenneth",
+    "louden",
+    "vm"
+  ],
+  
+  "author": "Delroy Gayle",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DelroyGayle/tinyToJS/issues"
+  },
+  "homepage": "https://github.com/DelroyGayle/tinyToJS#readme"
+}

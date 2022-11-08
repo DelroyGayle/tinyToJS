@@ -13,13 +13,12 @@ const TRUE = 1;
 /* MAXRESERVED = the number of reserved words */
 const MAXRESERVED = 8;
 
-const 
     /* book-keeping tokens */
 const ENDFILE = 0,ERROR = 1,
     /* reserved words */
     IF = 2, THEN = 3, ELSE = 4, END = 5, REPEAT = 6, UNTIL = 7, READ = 8, WRITE = 9,
     /* multicharacter tokens */
-    ID = 10,NUM = 11,
+    ID = 10, NUM = 11,
     /* special symbols */
     ASSIGN = 12, EQ = 13, LT = 14, PLUS = 15, MINUS = 16, TIMES = 17,
     OVER = 18, LPAREN = 19, RPAREN = 20, SEMI = 21;
