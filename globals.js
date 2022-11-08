@@ -6,6 +6,8 @@
 /* Kenneth C. Louden                                */
 /****************************************************/
 
+const { fstat } = require("fs");
+
 
 const FALSE = 0;
 const TRUE = 1;
@@ -78,3 +80,18 @@ let TraceCode;
 
 /* Error = TRUE prevents further passes if an error occurs */
 let Error; 
+
+const toScreen = ":screen:";
+
+const sprintf = require("sprintf-js").sprintf,
+      vsprintf = require("sprintf-js").vsprintf;
+// https://github.com/alexei/sprintf.js 
+
+const fprintf = (mode, string, array) => {
+    const result = vsprintf(string, array);
+    if (mode === globals.toScreen) {
+            process.stdout.write(string);
+     } else {
+            fs.write(handle, string)
+     }
+}

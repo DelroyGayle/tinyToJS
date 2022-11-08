@@ -17,11 +17,13 @@
     "louden",
     "vm"
   ],
-  
   "author": "Delroy Gayle",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/DelroyGayle/tinyToJS/issues"
   },
-  "homepage": "https://github.com/DelroyGayle/tinyToJS#readme"
+  "homepage": "https://github.com/DelroyGayle/tinyToJS#readme",
+  "dependencies": {
+    "sprintf-js": "^1.1.2"
+  }
 }

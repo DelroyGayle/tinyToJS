@@ -15,7 +15,8 @@ const process = require('process');
 const globals = require("./globals.js");
 const { TRUE, FALSE } = require("./globals.js");
 const { MAXTOKENLEN } = require("./scanHeader.js");
-let { source, listing, code, lineno,  } = require("./globals.js");
+const parse = require("./parse.js");
+let { source, code,  } = require("./globals.js");
 
 
 /* set NO_PARSE to TRUE to get a scanner-only compiler */
@@ -30,8 +31,7 @@ const NO_ANALYZE = TRUE;
 const NO_CODE = TRUE;
 
 /* allocate global variables */
-const toSCreen = 0;
-lineno = 0;
+globals.lineno = 0;
 
 /* allocate and set tracing flags */
 globals.EchoSource = FALSE;
@@ -61,7 +61,7 @@ function main( )
             }
                                             });
 
-  listing = toSCreen; /* send listing to screen */
+  globals.listing = globals.toScreen; /* send listing to screen */
   console.log(`\nTINY COMPILATION: ${pgm}`);
   if (NO_PARSE) {
           while (getToken()!=ENDFILE)
@@ -112,3 +112,4 @@ function main( )
   return 0;
 }
 
+main();
