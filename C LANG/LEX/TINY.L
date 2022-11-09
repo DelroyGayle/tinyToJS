@@ -22,34 +22,34 @@ whitespace  [ \t]+
 
 %%
 
-"if"            {return IF;}
-"then"          {return THEN;}
-"else"          {return ELSE;}
-"end"           {return END;}
-"repeat"        {return REPEAT;}
-"until"         {return UNTIL;}
-"read"          {return READ;}
-"write"         {return WRITE;}
-":="            {return ASSIGN;}
-"="             {return EQ;}
-"<"             {return LT;}
-"+"             {return PLUS;}
-"-"             {return MINUS;}
-"*"             {return TIMES;}
-"/"             {return OVER;}
-"("             {return LPAREN;}
-")"             {return RPAREN;}
-";"             {return SEMI;}
+"if"            {return common.IF;}
+"then"          {return common.THEN;}
+"else"          {return common.ELSE;}
+"end"           {return common.END;}
+"repeat"        {return common.REPEAT;}
+"until"         {return common.UNTIL;}
+"read"          {return common.READ;}
+"write"         {return common.WRITE;}
+":="            {return common.ASSIGN;}
+"="             {return common.EQ;}
+"<"             {return common.LT;}
+"+"             {return common.PLUS;}
+"-"             {return common.MINUS;}
+"*"             {return common.TIMES;}
+"/"             {return common.OVER;}
+"("             {return common.LPAREN;}
+")"             {return common.RPAREN;}
+";"             {return common.SEMI;}
 {number}        {return NUM;}
 {identifier}    {return ID;}
-{newline}       {lineno++;}
+{newline}       {common.lineno++;}
 {whitespace}    {/* skip whitespace */}
 "{"             { char c;
                   do
                   { c = input();
-                    if (c == EOF) break;
-                    if (c == '\n') lineno++;
-                  } while (c != '}');
+                    if (c === EOF) break;
+                    if (c === '\n') common.lineno++;
+                  } while (c !=== '}');
                 }
 .               {return ERROR;}
 
@@ -59,15 +59,15 @@ TokenType getToken(void)
 { static int firstTime = TRUE;
   TokenType currentToken;
   if (firstTime)
-  { firstTime = FALSE;
-    lineno++;
-    yyin = source;
-    yyout = listing;
+  { firstTime = common.FALSE;
+    common.lineno++;
+    yyin = common.source;
+    yyout = common.listing;
   }
   currentToken = yylex();
   strncpy(tokenString,yytext,MAXTOKENLEN);
-  if (TraceScan) {
-    fprintf(listing,"\t%d: ",lineno);
+  if (common.TraceScan) {
+    fprintf(common.listing,"\t%d: ",common.lineno);
     printToken(currentToken,tokenString);
   }
   return currentToken;

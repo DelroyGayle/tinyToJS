@@ -5,110 +5,108 @@
 /* Kenneth C. Louden                                */
 /****************************************************/
 
+// Shared and Globl Variables
+const common = require("./globals.js");
+
 // Include process module
-const process = require('process');
-// https://www.geeksforgeeks.org/node-js-process-argv-property/ 
- const fs = require('fs');
-// https://nodejs.org/api/fs.html 
-// https://www.w3schools.com/nodejs/nodejs_filesystem.asp 
+const process = require("process");
+// https://www.geeksforgeeks.org/node-js-process-argv-property/
+const fs = require("fs");
+// https://nodejs.org/api/fs.html
+// https://www.w3schools.com/nodejs/nodejs_filesystem.asp
 
-const globals = require("./globals.js");
-const { TRUE, FALSE } = require("./globals.js");
-const { MAXTOKENLEN } = require("./scanHeader.js");
 const parse = require("./parse.js");
-let { source, code,  } = require("./globals.js");
 
-
-/* set NO_PARSE to TRUE to get a scanner-only compiler */
-const NO_PARSE = TRUE;
+/* set NO_PARSE to common.TRUE to get a scanner-only compiler */
+const NO_PARSE = common.TRUE;
 
 /* set NO_ANALYZE to TRUE to get a parser-only compiler */
-const NO_ANALYZE = TRUE;
+const NO_ANALYZE = common.TRUE;
 
 /* set NO_CODE to TRUE to get a compiler that does not
- * generate code
+ * generate common.code
  */
-const NO_CODE = TRUE;
+const NO_CODE = common.TRUE;
 
 /* allocate global variables */
-globals.lineno = 0;
+common.lineno = 0;
 
 /* allocate and set tracing flags */
-globals.EchoSource = FALSE;
-globals.TraceScan = FALSE;
-globals.TraceParse = FALSE;
-globals.TraceAnalyze = FALSE;
-globals.TraceCode = FALSE;
+common.EchoSource = common.FALSE;
+common.TraceScan = common.FALSE;
+common.TraceParse = common.FALSE;
+common.TraceAnalyze = common.FALSE;
+common.TraceCode = common.FALSE;
 
-globals.Error = FALSE;
+common.Error = common.FALSE;
 
-function main( )
-{ let syntaxTree;
-  let pgm; /* source code file name */
+function main() {
+  let syntaxTree;
+  let pgm; /* common.source common.code file name */
   const args = process.argv;
-  if (args.length !== 2)
-    { console.log(`usage: ${args[0]} <filename>`);
+  if (args.length !== 2) {
+    console.log(`usage: ${args[0]} <filename>`);
+    process.exit(1);
+  }
+  pgm = args[1];
+  if (!/\./.test(pgm)) {
+    pgm += ".tny";
+  }
+  fs.open(pgm, "r", function (err, _) {
+    if (err) {
+      console.log(`File ${pgm} not found`);
       process.exit(1);
     }
-  pgm = args[1];
-  if (!(/\./.test(pgm))) {
-     pgm += ".tny";
-  }
-  fs.open(pgm, "r", function (err, source) {
-            if (err) { 
-                    console.log(`File ${pgm} not found`);
-                    process.exit(1);
-            }
-                                            });
+  });
 
-  globals.listing = globals.toScreen; /* send listing to screen */
+  common.listing = common.toScreen; /* send common.listing to screen */
+
   console.log(`\nTINY COMPILATION: ${pgm}`);
   if (NO_PARSE) {
-          while (getToken()!=ENDFILE)
-                ;
+    while (getToken() !== common.ENDFILE);
   } else {
-          syntaxTree = parse();
-          if (TraceParse) {
-                console.log("\nSyntax tree:");
-                printTree(syntaxTree);
-          }
+    syntaxTree = parse();
+    if (common.TraceParse) {
+      console.log("\nSyntax tree:");
+      printTree(syntaxTree);
+    }
 
-          if (! NO_ANALYZE) {
-                if (! Error) {
-                    if (TraceAnalyze) {
-                                        console.log("\nBuilding Symbol Table...");
-                    }
-                    buildSymtab(syntaxTree);
+    if (!NO_ANALYZE) {
+      if (!common.Error) {
+        if (common.TraceAnalyze) {
+          console.log("\nBuilding Symbol Table...");
+        }
+        buildSymtab(syntaxTree);
 
-                    if (TraceAnalyze) { 
-                                        console.log("\nChecking Types...");
-                    }
-                    typeCheck(syntaxTree);
+        if (common.TraceAnalyze) {
+          console.log("\nChecking Types...");
+        }
+        typeCheck(syntaxTree);
 
-                    if (TraceAnalyze) {
-                                        console.log("\nType Checking Finished");
-                    }
-                }
+        if (common.TraceAnalyze) {
+          console.log("\nType Checking Finished");
+        }
+      }
 
-                if (! NO_CODE) {
-                        if (! Error) {
-                                const fnlen = pgm.indexOf(".");
-                                const codefile = pgm.substring(0,fnlen) + ".tm";
-                                fs.open(codefile, "w", function (err, code) {
-                                    if (err) { 
-                                        console.log(`Unable to open ${codefile}`);
-                                        process.exit(1);
-                                    }
-                                });
-
-                                codeGen(syntaxTree,codefile);
-                                fs.close(code);
-                        }
-                }
+      if (!NO_CODE) {
+        if (!common.Error) {
+          const fnlen = pgm.indexOf(".");
+          const codefile = pgm.substring(0, fnlen) + ".tm";
+          fs.open(codefile, "w", function (err, _) {
+            if (err) {
+              console.log(`Unable to open ${codefile}`);
+              process.exit(1);
             }
+          });
+
+          codeGen(syntaxTree, codefile);
+          fs.close(common.code);
+        }
+      }
+    }
   }
 
-  fclose(source);
+  fclose(common.source);
   return 0;
 }
 

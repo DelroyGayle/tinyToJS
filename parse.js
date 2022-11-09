@@ -5,20 +5,9 @@
 /* Kenneth C. Louden                                */
 /****************************************************/
 
-const { ENDFILE, ERROR, IF, THEN, ELSE, END, 
-  REPEAT, UNTIL, READ, WRITE,
-  ID, NUM, ASSIGN, EQ, LT, PLUS, MINUS, TIMES, OVER,
-  LPAREN, RPAREN, SEMI, TRUE, } = require("./globals.js");
+// Shared and Globl Variables
+const common = require("./globals.js");
 
-const chooseStatement = {};
-console.log(IF,ENDFILE,NUM)
-chooseStatement[IF.toString()] = if_stmt;
-chooseStatement[REPEAT.toString()] = repeat_stmt;
-chooseStatement[ID.toString()] = assign_stmt;
-chooseStatement[READ.toString()] = read_stmt;
-chooseStatement[WRITE.toString()] = write_stmt;
-
-    
 let token; /* holds current token */
 
 /* function prototypes for recursive calls */
@@ -36,9 +25,9 @@ static TreeNode * term();
 static TreeNode * factor();
 
 typedef struct treeNode
-   { struct treeNode * child[MAXCHILDREN];
+   { struct treeNode * child[common.MAXCHILDREN];
      struct treeNode * sibling;
-     int lineno;
+     int common.lineno;
      NodeKind nodekind;
      union { StmtKind stmt; ExpKind exp;} kind;
      union { TokenType op;
@@ -49,232 +38,235 @@ typedef struct treeNode
 
 */
 
-function syntaxError(message)
-{ 
-  fprintf(listing,"\n>>> ", []);
-  fprintf(listing,"Syntax error at line %d: %s",[globals.lineno,message]);
-  globals.Error = TRUE;
+function syntaxError(message) {
+  fprintf(common.listing, "\n>>> ", []);
+  fprintf(common.listing, "Syntax error at line %d: %s", [
+    common.lineno,
+    message,
+  ]);
+  common.Error = common.TRUE;
 }
 
-function match(expected)
-{ if (token  ===  expected) {
-        token = getToken();
-    } else {
+function match(expected) {
+  if (token === expected) {
+    token = getToken();
+  } else {
     syntaxError("unexpected token -> ");
-    printToken(token,tokenString);
-    fprintf(listing,"      ", []);
+    printToken(token, tokenString);
+    fprintf(common.listing, "      ", []);
   }
 }
 
-function stmt_sequence()
-{ 
+function stmt_sequence() {
   let t = statement();
   let p = t;
-  while ((token !== ENDFILE) && (token !== END) &&
-         (token !== ELSE) && (token !== UNTIL))
-  { let q;
-    match(SEMI);
+  while (
+    token !== common.ENDFILE &&
+    token !== common.END &&
+    token !== common.ELSE &&
+    token !== common.UNTIL
+  ) {
+    let q;
+    match(common.SEMI);
     q = statement();
-    if (q !== NULL) {
-      if (t === NULL) {
-                        t = p = q;
-      } else { /* now p cannot be NULL either */
-      { p.sibling = q;
-        p = q;
+    if (q !== common.NULL) {
+      if (t === common.NULL) {
+        t = p = q;
+      } else {
+        /* now p cannot be common.NULL either */
+        {
+          p.sibling = q;
+          p = q;
+        }
       }
     }
+    return t;
   }
-  return t;
-}
 
-const if_stmt = () => { 
-  const t = newStmtNode(IfK);
-  match(IF);
-  if (t !== NULL) {
-                    t.child[0] = exp();
-  }
-  match(THEN);
-  if (t !== NULL) {
-                    t.child[1] = stmt_sequence();
-  }
-  if (token === ELSE) {
-                        match(ELSE);
-                        if (t !== NULL) {
-                            t.child[2] = stmt_sequence();
-                        }
-  }
-  match(END);
-  return t;
-}
-
-const repeat_stmt = () => {
-  const t = newStmtNode(RepeatK);
-  match(REPEAT);
-  if (t !== NULL) t.child[0] = stmt_sequence();
-  match(UNTIL);
-  if (t !== NULL) t.child[1] = exp();
-  return t;
-}
-
-const assign_stmt = () => {
-  const t = newStmtNode(AssignK);
-  if ((t !== NULL) && (token === ID)) {
-            t.attr.name = copyString(tokenString);
-  }
-  match(ID);
-  match(ASSIGN);
-  if (t !== NULL) {
-                    t.child[0] = exp();
-  }
-  return t;
-}
-
-const read_stmt = () => {
-  const t = newStmtNode(ReadK);
-  match(READ);
-  if ((t !== NULL) && (token === ID)) {
-    t.attr.name = copyString(tokenString);
-  }
-  match(ID);
-  return t;
-}
-
-const write_stmt = () => {
-  const t = newStmtNode(WriteK);
-  match(WRITE);
-  if (t !== NULL) {
-            t.child[0] = exp();
-  }
-  return t;
-}
-
-// Alternative to SWITCH Statement
-const chooseStatement = {};
-chooseStatement[IF.toString()] = if_stmt;
-chooseStatement[REPEAT.toString()] = repeat_stmt;
-chooseStatement[ID.toString()] = assign_stmt;
-chooseStatement[READ.toString()] = read_stmt;
-chooseStatement[WRITE.toString()] = write_stmt;
-
-function statement()
-{ 
-  let t = NULL;
-  const strToken = token.toString();
-  if (strToken in chooseStatement) {
-        t = chooseStatement[strToken]();
-  } else {
-              syntaxError("unexpected token -> ");
-              printToken(token,tokenString);
-              token = getToken();   
-  }
-  return t;
-}
-
-function exp()
-{ 
-  let t = simple_exp();
-  if ((token === LT)||(token === EQ)) {
-    const p = newExpNode(OpK);
-    if (p !== NULL) {
-      p.child[0] = t;
-      p.attr.op = token;
-      t = p;
+  const if_stmt = () => {
+    const t = newStmtNode(common.IfK);
+    match(common.IF);
+    if (t !== common.NULL) {
+      t.child[0] = exp();
     }
-    match(token);
-    if (t !== NULL)
-      t.child[1] = simple_exp();
-  }
-  return t;
-}
-
-function simple_exp() {
-  let t = term();
-  while ((token === PLUS)||(token === MINUS)) {
-    const p = newExpNode(OpK);
-    if (p !== NULL) {
-      p.child[0] = t;
-      p.attr.op = token;
-      t = p;
-      match(token);
-      t.child[1] = term();
+    match(common.THEN);
+    if (t !== common.NULL) {
+      t.child[1] = stmt_sequence();
     }
-  }
-  return t;
-}
-
-function term()
-{ 
-  let t = factor();
-  while ((token === TIMES)||(token === OVER)) {
-    const p = newExpNode(OpK);
-    if (p !== NULL) {
-      p.child[0] = t;
-      p.attr.op = token;
-      t = p;
-      match(token);
-      p.child[1] = factor();
-    }
-  }
-  return t;
-}
-
-function factor_NUM(t, token) {
-      t = newExpNode(ConstK);
-      if ((t !== NULL) && (token === NUM)) {
-        t.attr.val = atoi(tokenString);    
+    if (token === common.ELSE) {
+      match(common.ELSE);
+      if (t !== common.NULL) {
+        t.child[2] = stmt_sequence();
       }
-      match(NUM);
-      return t;
-}
+    }
+    match(common.END);
+    return t;
+  };
 
-function factor_ID(t, token) {
-      t = newExpNode(IdK);
-      if ((t !== NULL) && (token === ID)) {
-        t.attr.name = copyString(tokenString);
-      };
-      match(ID);    
-      return t;
-}
+  const repeat_stmt = () => {
+    const t = newStmtNode(common.RepeatK);
+    match(common.REPEAT);
+    if (t !== common.NULL) t.child[0] = stmt_sequence();
+    match(common.UNTIL);
+    if (t !== common.NULL) t.child[1] = exp();
+    return t;
+  };
 
-function factor_LPAREN(t, _) {
-      match(LPAREN);
-      t = exp();
-      match(RPAREN);   
-      return t;
-}
+  const assign_stmt = () => {
+    const t = newStmtNode(common.AssignK);
+    if (t !== common.NULL && token === ID) {
+      t.attr.name = tokenString;
+    }
+    match(common.ID);
+    match(common.ASSIGN);
+    if (t !== common.NULL) {
+      t.child[0] = exp();
+    }
+    return t;
+  };
 
-// Alternative to SWITCH Statement
-const chooseFactorRoutine = {};
-chooseFactorRoutine[NUM.toString()] = factor_NUM;
-chooseFactorRoutine[ID.toString()] = factor_ID;
-chooseFactorRoutine[LPAREN.toString()] = factor_LPAREN;
+  const read_stmt = () => {
+    const t = newStmtNode(common.ReadK);
+    match(common.READ);
+    if (t !== common.NULL && token === ID) {
+      t.attr.name = tokenString;
+    }
+    match(common.ID);
+    return t;
+  };
 
-function factor() {
-  let t = NULL;
-  const strToken = t.toString();
-  if (strToken in chooseFactorRoutine) {
-        t = chooseFactorRoutine[strToken]();
-  } else {
+  const write_stmt = () => {
+    const t = newStmtNode(common.WriteK);
+    match(common.WRITE);
+    if (t !== common.NULL) {
+      t.child[0] = exp();
+    }
+    return t;
+  };
+
+  // Alternative to SWITCH Statement
+  const chooseStatement = {};
+  chooseStatement[common.IF.toString()] = if_stmt;
+  chooseStatement[common.REPEAT.toString()] = repeat_stmt;
+  chooseStatement[common.ID.toString()] = assign_stmt;
+  chooseStatement[common.READ.toString()] = read_stmt;
+  chooseStatement[common.WRITE.toString()] = write_stmt;
+
+  function statement() {
+    let t = common.NULL;
+    const strToken = token.toString();
+    if (strToken in chooseStatement) {
+      t = chooseStatement[strToken]();
+    } else {
       syntaxError("unexpected token -> ");
-      printToken(token,tokenString);
+      printToken(token, tokenString);
       token = getToken();
+    }
+    return t;
   }
-  return t;
+
+  function exp() {
+    let t = simple_exp();
+    if (token === common.LT || token === common.EQ) {
+      const p = newExpNode(common.OpK);
+      if (p !== common.NULL) {
+        p.child[0] = t;
+        p.attr.op = token;
+        t = p;
+      }
+      match(token);
+      if (t !== common.NULL) t.child[1] = simple_exp();
+    }
+    return t;
+  }
+
+  function simple_exp() {
+    let t = term();
+    while (token === common.PLUS || token === common.MINUS) {
+      const p = newExpNode(common.OpK);
+      if (p !== common.NULL) {
+        p.child[0] = t;
+        p.attr.op = token;
+        t = p;
+        match(token);
+        t.child[1] = term();
+      }
+    }
+    return t;
+  }
+
+  function term() {
+    let t = factor();
+    while (token === common.TIMES || token === common.OVER) {
+      const p = newExpNode(common.OpK);
+      if (p !== common.NULL) {
+        p.child[0] = t;
+        p.attr.op = token;
+        t = p;
+        match(token);
+        p.child[1] = factor();
+      }
+    }
+    return t;
+  }
+
+  function factor_NUM(t, token) {
+    t = newExpNode(common.ConstK);
+    if (t !== common.NULL && token === common.NUM) {
+      t.attr.val = Number(tokenString);
+    }
+    match(common.NUM);
+    return t;
+  }
+
+  function factor_ID(t, token) {
+    t = newExpNode(common.IdK);
+    if (t !== common.NULL && token === ID) {
+      t.attr.name = tokenString;
+    }
+    match(common.ID);
+    return t;
+  }
+
+  function factor_LPAREN(t, _) {
+    match(common.LPAREN);
+    t = exp();
+    match(common.RPAREN);
+    return t;
+  }
+
+  // Alternative to SWITCH Statement
+  const chooseFactorRoutine = {};
+  chooseFactorRoutine[common.NUM.toString()] = factor_NUM;
+  chooseFactorRoutine[common.ID.toString()] = factor_ID;
+  chooseFactorRoutine[common.LPAREN.toString()] = factor_LPAREN;
+
+  function factor() {
+    let t = common.NULL;
+    const strToken = t.toString();
+    if (strToken in chooseFactorRoutine) {
+      t = chooseFactorRoutine[strToken]();
+    } else {
+      syntaxError("unexpected token -> ");
+      printToken(token, tokenString);
+      token = getToken();
+    }
+    return t;
+  }
+
+  /****************************************/
+  /* the primary function of the parser   */
+  /****************************************/
+  /* Function parse returns the newly
+   * constructed syntax tree
+   */
+  function parse() {
+    let t;
+    token = getToken();
+    t = stmt_sequence();
+    if (token !== common.ENDFILE) {
+      syntaxError("Code ends before file\n");
+    }
+    return t;
+  }
 }
-
-
-/****************************************/
-/* the primary function of the parser   */
-/****************************************/
-/* Function parse returns the newly 
- * constructed syntax tree
-*/
-function parse() {
-  let t;
-  token = getToken();
-  t = stmt_sequence();
-  if (token !== ENDFILE) {
-    syntaxError("Code ends before file\n");
-  }
-  return t;
-}}

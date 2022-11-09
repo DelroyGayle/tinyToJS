@@ -4,7 +4,7 @@
   "description": "TINY compiler using JavaScript",
   "main": "tiny.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"common.Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",

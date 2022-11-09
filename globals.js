@@ -1,50 +1,55 @@
 /****************************************************/
-/* File: globals.h                                  */
+/* File: globals.js                                 */
 /* Global types and vars for TINY compiler          */
 /* must come before other include files             */
 /* Compiler Construction: Principles and Practice   */
 /* Kenneth C. Louden                                */
 /****************************************************/
 
-const { fstat } = require("fs");
+// These are all CONSTANTS :-
 
-
-const FALSE = 0;
-const TRUE = 1;
+const common = { FALSE : 0, TRUE : 1, 
 
 /* MAXRESERVED = the number of reserved words */
-const MAXRESERVED = 8;
+                MAXRESERVED : 8,
 
     /* book-keeping tokens */
-const ENDFILE = 0,ERROR = 1,
-    /* reserved words */
-    IF = 2, THEN = 3, ELSE = 4, END = 5, REPEAT = 6, UNTIL = 7, READ = 8, WRITE = 9,
+                ENDFILE : 0,
+                ERROR : 1,
+    /* reserved words */ 
+                IF : 2, 
+                THEN : 3, ELSE : 4, END : 5, REPEAT : 6, UNTIL : 7, READ : 8, WRITE : 9,
     /* multicharacter tokens */
-    ID = 10, NUM = 11,
+                ID : 10, NUM : 11,
     /* special symbols */
-    ASSIGN = 12, EQ = 13, LT = 14, PLUS = 15, MINUS = 16, TIMES = 17,
-    OVER = 18, LPAREN = 19, RPAREN = 20, SEMI = 21;
-    // The above is TokenType;
+                ASSIGN : 12, EQ : 13, LT : 14, PLUS : 15, MINUS : 16, TIMES : 17,
+                OVER : 18, LPAREN : 19, RPAREN : 20, SEMI : 21,
 
-let source; /* source code text file */
-let listing; /* listing output text file */
-let code; /* code text file for TM simulator */
-
-let lineno; /* source line number for listing */
+    // The above are the TokenTypes;
 
 /**************************************************/
 /***********   Syntax tree for parsing ************/
 /**************************************************/
 
-const StmtK = 0, ExpK = 1; // NodeKind;
-const IfK = 0, RepeatK = 1, AssignK = 2, ReadK = 3, WriteK = 4; // StmtKind;
-const OpK = 0, ConstK = 1, IdK = 2; // ExpKind;
+                StmtK : 0, ExpK : 1, // NodeKind;
+                IfK : 0, RepeatK : 1, AssignK : 2, ReadK : 3, WriteK : 4, // StmtKind;
+                OpK : 0, ConstK : 1, IdK : 2, // ExpKind;
 
 /* ExpType is used for type checking */
-const Void = 0, Integer = 1, Boolean = 2; // ExpType;
+                Void : 0, Integer : 1, Boolean : 2, // ExpType;
 
-const MAXCHILDREN = 3;
+                MAXCHILDREN : 3,
+                NULL : null,
+                toScreen : ":screen:",
 
+// These are all MUTABLE :-
+
+
+                source : null, /* source code text file */
+                listing : null, /* listing output text file */
+                code : null, /* code text file for TM simulator */
+
+                lineno : 0, /* source line number for listing */
 
 /**************************************************/
 /***********   Flags for tracing       ************/
@@ -54,34 +59,32 @@ const MAXCHILDREN = 3;
  * be echoed to the listing file with line numbers
  * during parsing
  */
-let EchoSource;
+                EchoSource : null,
 
 /* TraceScan = TRUE causes token information to be
  * printed to the listing file as each token is
  * recognized by the scanner
  */
-let TraceScan;
+                TraceScan : null,
 
 /* TraceParse = TRUE causes the syntax tree to be
  * printed to the listing file in linearized form
  * (using indents for children)
  */
-let TraceParse;
+                TraceParse : null,
 
 /* TraceAnalyze = TRUE causes symbol table inserts
  * and lookups to be reported to the listing file
  */
-let TraceAnalyze;
+                TraceAnalyze : null,
 
 /* TraceCode = TRUE causes comments to be written
  * to the TM code file as code is generated
  */
-let TraceCode;
+                TraceCode : null,
 
 /* Error = TRUE prevents further passes if an error occurs */
-let Error; 
-
-const toScreen = ":screen:";
+                Error : null};
 
 const sprintf = require("sprintf-js").sprintf,
       vsprintf = require("sprintf-js").vsprintf;
@@ -89,9 +92,12 @@ const sprintf = require("sprintf-js").sprintf,
 
 const fprintf = (mode, string, array) => {
     const result = vsprintf(string, array);
-    if (mode === globals.toScreen) {
+    if (mode === toScreen) {
             process.stdout.write(string);
      } else {
             fs.write(handle, string)
      }
 }
+
+
+module.exports = common;

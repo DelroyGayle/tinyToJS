@@ -29,15 +29,15 @@
 /* the name of the following file may change */
 #include "y.tab.h"
 
-/* ENDFILE is implicitly defined by Yacc/Bison,
+/* common.ENDFILE is implicitly defined by Yacc/Bison,
  * and not included in the tab.h file
  */
-#define ENDFILE 0
+#define common.ENDFILE 0
 
 #endif
 
-#ifndef FALSE
-#define FALSE 0
+#ifndef common.FALSE
+#define common.FALSE 0
 #endif
 
 #ifndef TRUE
@@ -52,29 +52,29 @@
  */
 typedef int TokenType; 
 
-extern FILE* source; /* source code text file */
-extern FILE* listing; /* listing output text file */
-extern FILE* code; /* code text file for TM simulator */
+extern FILE* common.source; /* common.source common.code text file */
+extern FILE* common.listing; /* common.listing output text file */
+extern FILE* common.code; /* common.code text file for TM simulator */
 
-extern int lineno; /* source line number for listing */
+extern int common.lineno; /* common.source line number for common.listing */
 
 /**************************************************/
 /***********   Syntax tree for parsing ************/
 /**************************************************/
 
-typedef enum {StmtK,ExpK} NodeKind;
-typedef enum {IfK,RepeatK,AssignK,ReadK,WriteK} StmtKind;
-typedef enum {OpK,ConstK,IdK} ExpKind;
+typedef enum {common.StmtK,common.ExpK} NodeKind;
+typedef enum {common.IfK,common.RepeatK,common.AssignK,common.ReadK,common.WriteK} StmtKind;
+typedef enum {common.OpK,common.ConstK,common.IdK} ExpKind;
 
 /* ExpType is used for type checking */
-typedef enum {Void,Integer,Boolean} ExpType;
+typedef enum {common.Void,common.Integer,common.Boolean} ExpType;
 
-#define MAXCHILDREN 3
+#define common.MAXCHILDREN 3
 
 typedef struct treeNode
-   { struct treeNode * child[MAXCHILDREN];
+   { struct treeNode * child[common.MAXCHILDREN];
      struct treeNode * sibling;
-     int lineno;
+     int common.lineno;
      NodeKind nodekind;
      union { StmtKind stmt; ExpKind exp;} kind;
      union { TokenType op;
@@ -87,34 +87,34 @@ typedef struct treeNode
 /***********   Flags for tracing       ************/
 /**************************************************/
 
-/* EchoSource = TRUE causes the source program to
- * be echoed to the listing file with line numbers
+/* common.EchoSource = TRUE causes the common.source program to
+ * be echoed to the common.listing file with line numbers
  * during parsing
  */
-extern int EchoSource;
+extern int common.EchoSource;
 
-/* TraceScan = TRUE causes token information to be
- * printed to the listing file as each token is
+/* common.TraceScan = TRUE causes token information to be
+ * printed to the common.listing file as each token is
  * recognized by the scanner
  */
-extern int TraceScan;
+extern int common.TraceScan;
 
-/* TraceParse = TRUE causes the syntax tree to be
- * printed to the listing file in linearized form
+/* common.TraceParse = TRUE causes the syntax tree to be
+ * printed to the common.listing file in linearized form
  * (using indents for children)
  */
-extern int TraceParse;
+extern int common.TraceParse;
 
-/* TraceAnalyze = TRUE causes symbol table inserts
- * and lookups to be reported to the listing file
+/* common.TraceAnalyze = TRUE causes symbol table inserts
+ * and lookups to be reported to the common.listing file
  */
-extern int TraceAnalyze;
+extern int common.TraceAnalyze;
 
-/* TraceCode = TRUE causes comments to be written
- * to the TM code file as code is generated
+/* common.TraceCode = TRUE causes comments to be written
+ * to the TM common.code file as common.code is generated
  */
-extern int TraceCode;
+extern int common.TraceCode;
 
-/* Error = TRUE prevents further passes if an error occurs */
-extern int Error; 
+/* common.Error = TRUE prevents further passes if an error occurs */
+extern int common.Error; 
 #endif

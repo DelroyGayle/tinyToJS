@@ -5,7 +5,7 @@
 /* Kenneth C. Louden                                */
 /****************************************************/
 %{
-#define YYPARSER /* distinguishes Yacc output from other code files */
+#define YYPARSER /* distinguishes Yacc output from other common.code files */
 
 #include "globals.h"
 #include "util.h"
@@ -19,9 +19,9 @@ static TreeNode * savedTree; /* stores syntax tree for later return */
 
 %}
 
-%token IF THEN ELSE END REPEAT UNTIL READ WRITE
+%token common.IF common.THEN common.ELSE common.END common.REPEAT common.UNTIL common.READ common.WRITE
 %token ID NUM 
-%token ASSIGN EQ LT PLUS MINUS TIMES OVER LPAREN RPAREN SEMI
+%token common.ASSIGN common.EQ common.LT common.PLUS common.MINUS common.TIMES common.OVER common.LPAREN common.RPAREN common.SEMI
 %token ERROR 
 
 %% /* Grammar for TINY */
@@ -29,10 +29,10 @@ static TreeNode * savedTree; /* stores syntax tree for later return */
 program     : stmt_seq
                  { savedTree = $1;} 
             ;
-stmt_seq    : stmt_seq SEMI stmt
+stmt_seq    : stmt_seq common.SEMI stmt
                  { YYSTYPE t = $1;
-                   if (t != NULL)
-                   { while (t->sibling != NULL)
+                   if (t !=== common.NULL)
+                   { while (t->sibling !=== common.NULL)
                         t = t->sibling;
                      t->sibling = $3;
                      $$ = $1; }
@@ -45,108 +45,108 @@ stmt        : if_stmt { $$ = $1; }
             | assign_stmt { $$ = $1; }
             | read_stmt { $$ = $1; }
             | write_stmt { $$ = $1; }
-            | error  { $$ = NULL; }
+            | error  { $$ = common.NULL; }
             ;
-if_stmt     : IF exp THEN stmt_seq END
-                 { $$ = newStmtNode(IfK);
+if_stmt     : common.IF exp common.THEN stmt_seq common.END
+                 { $$ = newStmtNode(common.IfK);
                    $$->child[0] = $2;
                    $$->child[1] = $4;
                  }
-            | IF exp THEN stmt_seq ELSE stmt_seq END
-                 { $$ = newStmtNode(IfK);
+            | common.IF exp common.THEN stmt_seq common.ELSE stmt_seq common.END
+                 { $$ = newStmtNode(common.IfK);
                    $$->child[0] = $2;
                    $$->child[1] = $4;
                    $$->child[2] = $6;
                  }
             ;
-repeat_stmt : REPEAT stmt_seq UNTIL exp
-                 { $$ = newStmtNode(RepeatK);
+repeat_stmt : common.REPEAT stmt_seq common.UNTIL exp
+                 { $$ = newStmtNode(common.RepeatK);
                    $$->child[0] = $2;
                    $$->child[1] = $4;
                  }
             ;
 assign_stmt : ID { savedName = copyString(tokenString);
-                   savedLineNo = lineno; }
-              ASSIGN exp
-                 { $$ = newStmtNode(AssignK);
+                   savedLineNo = common.lineno; }
+              common.ASSIGN exp
+                 { $$ = newStmtNode(common.AssignK);
                    $$->child[0] = $4;
                    $$->attr.name = savedName;
-                   $$->lineno = savedLineNo;
+                   $$->common.lineno = savedLineNo;
                  }
             ;
-read_stmt   : READ ID
-                 { $$ = newStmtNode(ReadK);
+read_stmt   : common.READ ID
+                 { $$ = newStmtNode(common.ReadK);
                    $$->attr.name =
                      copyString(tokenString);
                  }
             ;
-write_stmt  : WRITE exp
-                 { $$ = newStmtNode(WriteK);
+write_stmt  : common.WRITE exp
+                 { $$ = newStmtNode(common.WriteK);
                    $$->child[0] = $2;
                  }
             ;
-exp         : simple_exp LT simple_exp 
-                 { $$ = newExpNode(OpK);
+exp         : simple_exp common.LT simple_exp 
+                 { $$ = newExpNode(common.OpK);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
-                   $$->attr.op = LT;
+                   $$->attr.op = common.LT;
                  }
-            | simple_exp EQ simple_exp
-                 { $$ = newExpNode(OpK);
+            | simple_exp common.EQ simple_exp
+                 { $$ = newExpNode(common.OpK);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
-                   $$->attr.op = EQ;
+                   $$->attr.op = common.EQ;
                  }
             | simple_exp { $$ = $1; }
             ;
-simple_exp  : simple_exp PLUS term 
-                 { $$ = newExpNode(OpK);
+simple_exp  : simple_exp common.PLUS term 
+                 { $$ = newExpNode(common.OpK);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
-                   $$->attr.op = PLUS;
+                   $$->attr.op = common.PLUS;
                  }
-            | simple_exp MINUS term
-                 { $$ = newExpNode(OpK);
+            | simple_exp common.MINUS term
+                 { $$ = newExpNode(common.OpK);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
-                   $$->attr.op = MINUS;
+                   $$->attr.op = common.MINUS;
                  } 
             | term { $$ = $1; }
             ;
-term        : term TIMES factor 
-                 { $$ = newExpNode(OpK);
+term        : term common.TIMES factor 
+                 { $$ = newExpNode(common.OpK);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
-                   $$->attr.op = TIMES;
+                   $$->attr.op = common.TIMES;
                  }
-            | term OVER factor
-                 { $$ = newExpNode(OpK);
+            | term common.OVER factor
+                 { $$ = newExpNode(common.OpK);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
-                   $$->attr.op = OVER;
+                   $$->attr.op = common.OVER;
                  }
             | factor { $$ = $1; }
             ;
-factor      : LPAREN exp RPAREN
+factor      : common.LPAREN exp common.RPAREN
                  { $$ = $2; }
             | NUM
-                 { $$ = newExpNode(ConstK);
+                 { $$ = newExpNode(common.ConstK);
                    $$->attr.val = atoi(tokenString);
                  }
-            | ID { $$ = newExpNode(IdK);
+            | ID { $$ = newExpNode(common.IdK);
                    $$->attr.name =
                          copyString(tokenString);
                  }
-            | error { $$ = NULL; }
+            | error { $$ = common.NULL; }
             ;
 
 %%
 
 int yyerror(char * message)
-{ fprintf(listing,"Syntax error at line %d: %s\n",lineno,message);
-  fprintf(listing,"Current token: ");
+{ fprintf(common.listing,"Syntax error at line %d: %s\n",common.lineno,message);
+  fprintf(common.listing,"Current token: ");
   printToken(yychar,tokenString);
-  Error = TRUE;
+  common.Error = TRUE;
   return 0;
 }
 

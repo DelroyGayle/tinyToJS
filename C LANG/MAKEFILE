@@ -2,7 +2,7 @@ cc = gcc
 
 CFLAGS = 
 
-tiny: main.o util.o scan.o parse.o symtab.o analyze.o code.o cgen.o
+tiny: main.o util.o scan.o parse.o symtab.o analyze.o common.code.o cgen.o
 	gcc -g main.o
 
 main.o: main.c globals.h util.h scan.h parse.h analyze.h cgen.h
@@ -23,15 +23,15 @@ symtab.o: symtab.c symtab.h
 analyze.o: analyze.c globals.h symtab.h analyze.h
 	gcc -g -c analyze.c
 
-code.o: code.c code.h globals.h
-	gcc -g  -c code.c
+common.code.o: common.code.c common.code.h globals.h
+	gcc -g  -c common.code.c
 
-cgen.o: cgen.c globals.h symtab.h code.h cgen.h
+cgen.o: cgen.c globals.h symtab.h common.code.h cgen.h
 	gcc -g -c cgen.c
 
 
 clean: 
-	rm -f tiny main.o util.o scan.o parse.o symtab.o analyze.o code.o cgen.o lex/lex.yy.c yacc/tiny.tab.c  
+	rm -f tiny main.o util.o scan.o parse.o symtab.o analyze.o common.code.o cgen.o lex/lex.yy.c yacc/tiny.tab.c  
 
 tm: tm.c
 	gcc -g tm.c
