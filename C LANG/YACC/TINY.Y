@@ -5,7 +5,7 @@
 /* Kenneth C. Louden                                */
 /****************************************************/
 %{
-#define YYPARSER /* distinguishes Yacc output from other common.code files */
+#define YYPARSER /* distinguishes Yacc output from other code files */
 
 #include "globals.h"
 #include "util.h"
@@ -20,9 +20,9 @@ static TreeNode * savedTree; /* stores syntax tree for later return */
 %}
 
 %token common.IF common.THEN common.ELSE common.END common.REPEAT common.UNTIL common.READ common.WRITE
-%token ID NUM 
+%token common.ID common.NUM 
 %token common.ASSIGN common.EQ common.LT common.PLUS common.MINUS common.TIMES common.OVER common.LPAREN common.RPAREN common.SEMI
-%token ERROR 
+%token common.ERROR 
 
 %% /* Grammar for TINY */
 
@@ -65,7 +65,7 @@ repeat_stmt : common.REPEAT stmt_seq common.UNTIL exp
                    $$->child[1] = $4;
                  }
             ;
-assign_stmt : ID { savedName = copyString(tokenString);
+assign_stmt : common.ID { savedName = copyString(tokenString);
                    savedLineNo = common.lineno; }
               common.ASSIGN exp
                  { $$ = newStmtNode(common.AssignK);
@@ -74,7 +74,7 @@ assign_stmt : ID { savedName = copyString(tokenString);
                    $$->common.lineno = savedLineNo;
                  }
             ;
-read_stmt   : common.READ ID
+read_stmt   : common.READ common.ID
                  { $$ = newStmtNode(common.ReadK);
                    $$->attr.name =
                      copyString(tokenString);
@@ -129,11 +129,11 @@ term        : term common.TIMES factor
             ;
 factor      : common.LPAREN exp common.RPAREN
                  { $$ = $2; }
-            | NUM
+            | common.NUM
                  { $$ = newExpNode(common.ConstK);
                    $$->attr.val = atoi(tokenString);
                  }
-            | ID { $$ = newExpNode(common.IdK);
+            | common.ID { $$ = newExpNode(common.IdK);
                    $$->attr.name =
                          copyString(tokenString);
                  }
@@ -146,17 +146,17 @@ int yyerror(char * message)
 { fprintf(common.listing,"Syntax error at line %d: %s\n",common.lineno,message);
   fprintf(common.listing,"Current token: ");
   printToken(yychar,tokenString);
-  common.Error = TRUE;
+  common.Error = common.TRUE;
   return 0;
 }
 
 /* yylex calls getToken to make Yacc/Bison output
  * compatible with ealier versions of the TINY scanner
  */
-static int yylex(void)
+static int yylex()
 { return getToken(); }
 
-TreeNode * parse(void)
+TreeNode * parse()
 { yyparse();
   return savedTree;
 }

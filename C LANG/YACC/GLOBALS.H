@@ -40,8 +40,8 @@
 #define common.FALSE 0
 #endif
 
-#ifndef TRUE
-#define TRUE 1
+#ifndef common.TRUE
+#define common.TRUE 1
 #endif
 
 /* MAXRESERVED = the number of reserved words */
@@ -52,9 +52,9 @@
  */
 typedef int TokenType; 
 
-extern FILE* common.source; /* common.source common.code text file */
+extern FILE* common.source; /* common.source code text file */
 extern FILE* common.listing; /* common.listing output text file */
-extern FILE* common.code; /* common.code text file for TM simulator */
+extern FILE* code; /* code text file for TM simulator */
 
 extern int common.lineno; /* common.source line number for common.listing */
 
@@ -87,34 +87,34 @@ typedef struct treeNode
 /***********   Flags for tracing       ************/
 /**************************************************/
 
-/* common.EchoSource = TRUE causes the common.source program to
+/* common.EchoSource = common.TRUE causes the common.source program to
  * be echoed to the common.listing file with line numbers
  * during parsing
  */
 extern int common.EchoSource;
 
-/* common.TraceScan = TRUE causes token information to be
+/* common.TraceScan = common.TRUE causes token information to be
  * printed to the common.listing file as each token is
  * recognized by the scanner
  */
 extern int common.TraceScan;
 
-/* common.TraceParse = TRUE causes the syntax tree to be
+/* common.TraceParse = common.TRUE causes the syntax tree to be
  * printed to the common.listing file in linearized form
  * (using indents for children)
  */
 extern int common.TraceParse;
 
-/* common.TraceAnalyze = TRUE causes symbol table inserts
+/* common.TraceAnalyze = common.TRUE causes symbol table inserts
  * and lookups to be reported to the common.listing file
  */
 extern int common.TraceAnalyze;
 
-/* common.TraceCode = TRUE causes comments to be written
- * to the TM common.code file as common.code is generated
+/* common.TraceCode = common.TRUE causes comments to be written
+ * to the TM code file as code is generated
  */
 extern int common.TraceCode;
 
-/* common.Error = TRUE prevents further passes if an error occurs */
+/* common.Error = common.TRUE prevents further passes if an error occurs */
 extern int common.Error; 
 #endif

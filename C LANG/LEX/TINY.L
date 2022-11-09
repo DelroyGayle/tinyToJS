@@ -40,23 +40,23 @@ whitespace  [ \t]+
 "("             {return common.LPAREN;}
 ")"             {return common.RPAREN;}
 ";"             {return common.SEMI;}
-{number}        {return NUM;}
-{identifier}    {return ID;}
+{number}        {return common.NUM;}
+{identifier}    {return common.ID;}
 {newline}       {common.lineno++;}
 {whitespace}    {/* skip whitespace */}
 "{"             { char c;
                   do
                   { c = input();
-                    if (c === EOF) break;
+                    if (c === common.EOF) break;
                     if (c === '\n') common.lineno++;
                   } while (c !=== '}');
                 }
-.               {return ERROR;}
+.               {return common.ERROR;}
 
 %%
 
-TokenType getToken(void)
-{ static int firstTime = TRUE;
+TokenType getToken()
+{ static int firstTime = common.TRUE;
   TokenType currentToken;
   if (firstTime)
   { firstTime = common.FALSE;

@@ -25,9 +25,9 @@ static TreeNode * term();
 static TreeNode * factor();
 
 typedef struct treeNode
-   { struct treeNode * child[common.MAXCHILDREN];
+   { struct treeNode * child[MAXCHILDREN];
      struct treeNode * sibling;
-     int common.lineno;
+     int lineno;
      NodeKind nodekind;
      union { StmtKind stmt; ExpKind exp;} kind;
      union { TokenType op;
@@ -73,7 +73,7 @@ function stmt_sequence() {
       if (t === common.NULL) {
         t = p = q;
       } else {
-        /* now p cannot be common.NULL either */
+        /* now p cannot be NULL either */
         {
           p.sibling = q;
           p = q;
@@ -114,7 +114,7 @@ function stmt_sequence() {
 
   const assign_stmt = () => {
     const t = newStmtNode(common.AssignK);
-    if (t !== common.NULL && token === ID) {
+    if (t !== common.NULL && token === common.ID) {
       t.attr.name = tokenString;
     }
     match(common.ID);
@@ -128,7 +128,7 @@ function stmt_sequence() {
   const read_stmt = () => {
     const t = newStmtNode(common.ReadK);
     match(common.READ);
-    if (t !== common.NULL && token === ID) {
+    if (t !== common.NULL && token === common.ID) {
       t.attr.name = tokenString;
     }
     match(common.ID);
@@ -210,7 +210,7 @@ function stmt_sequence() {
     return t;
   }
 
-  function factor_NUM(t, token) {
+  function factor_num(t, token) {
     t = newExpNode(common.ConstK);
     if (t !== common.NULL && token === common.NUM) {
       t.attr.val = Number(tokenString);
@@ -221,7 +221,7 @@ function stmt_sequence() {
 
   function factor_ID(t, token) {
     t = newExpNode(common.IdK);
-    if (t !== common.NULL && token === ID) {
+    if (t !== common.NULL && token === common.ID) {
       t.attr.name = tokenString;
     }
     match(common.ID);
@@ -237,7 +237,7 @@ function stmt_sequence() {
 
   // Alternative to SWITCH Statement
   const chooseFactorRoutine = {};
-  chooseFactorRoutine[common.NUM.toString()] = factor_NUM;
+  chooseFactorRoutine[common.NUM.toString()] = factor_num;
   chooseFactorRoutine[common.ID.toString()] = factor_ID;
   chooseFactorRoutine[common.LPAREN.toString()] = factor_LPAREN;
 

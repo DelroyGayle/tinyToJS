@@ -40,6 +40,7 @@ const common = { FALSE : 0, TRUE : 1,
 
                 MAXCHILDREN : 3,
                 NULL : null,
+                EOF : -1,
                 toScreen : ":screen:",
 
 // These are all MUTABLE :-
@@ -84,7 +85,9 @@ const common = { FALSE : 0, TRUE : 1,
                 TraceCode : null,
 
 /* Error = TRUE prevents further passes if an error occurs */
-                Error : null};
+                Error : null,
+              
+                theReadLines : null};
 
 const sprintf = require("sprintf-js").sprintf,
       vsprintf = require("sprintf-js").vsprintf;
@@ -101,3 +104,4 @@ const fprintf = (mode, string, array) => {
 
 
 module.exports = common;
+exports.fprintf = fprintf;

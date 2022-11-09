@@ -17,14 +17,14 @@ const fs = require("fs");
 
 const parse = require("./parse.js");
 
-/* set NO_PARSE to common.TRUE to get a scanner-only compiler */
+/* set NO_PARSE to TRUE to get a scanner-only compiler */
 const NO_PARSE = common.TRUE;
 
 /* set NO_ANALYZE to TRUE to get a parser-only compiler */
 const NO_ANALYZE = common.TRUE;
 
 /* set NO_CODE to TRUE to get a compiler that does not
- * generate common.code
+ * generate code
  */
 const NO_CODE = common.TRUE;
 
@@ -42,9 +42,18 @@ common.Error = common.FALSE;
 
 function main() {
   let syntaxTree;
-  let pgm; /* common.source common.code file name */
+  let pgm; /* source code file name */
+
   const args = process.argv;
-  if (args.length !== 2) {
+  // Check that the program has been invoked properly
+  let pattern = /tiny(.js)?$/i;
+  let tempIndex = args.findIndex((element) => pattern.test(element));
+  let temp = tempIndex;
+  console.log(temp,tempIndex, args)
+  while (temp-- > 0) { // ignore prior arguments
+        args.shift();
+  }
+  if (args.length !== 2 || tempIndex < 0) {
     console.log(`usage: ${args[0]} <filename>`);
     process.exit(1);
   }
@@ -52,14 +61,19 @@ function main() {
   if (!/\./.test(pgm)) {
     pgm += ".tny";
   }
-  fs.open(pgm, "r", function (err, _) {
+  common.source = pgm;
+
+  // Read the entire input file and split it up into the lines
+  let theReadData;
+  fs.readFileSync(pgm, "utf8", function (err, theReadData) {
     if (err) {
       console.log(`File ${pgm} not found`);
       process.exit(1);
     }
   });
+  common.theReadLines = theReadData.split(/\r?\n/);
 
-  common.listing = common.toScreen; /* send common.listing to screen */
+  common.listing = common.toScreen; /* send listing to screen */
 
   console.log(`\nTINY COMPILATION: ${pgm}`);
   if (NO_PARSE) {
@@ -92,21 +106,13 @@ function main() {
         if (!common.Error) {
           const fnlen = pgm.indexOf(".");
           const codefile = pgm.substring(0, fnlen) + ".tm";
-          fs.open(codefile, "w", function (err, _) {
-            if (err) {
-              console.log(`Unable to open ${codefile}`);
-              process.exit(1);
-            }
-          });
-
           codeGen(syntaxTree, codefile);
-          fs.close(common.code);
+          fs.close(code);
         }
       }
     }
   }
 
-  fclose(common.source);
   return 0;
 }
 
