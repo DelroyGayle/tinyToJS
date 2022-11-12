@@ -31,8 +31,8 @@ program     : stmt_seq
             ;
 stmt_seq    : stmt_seq common.SEMI stmt
                  { YYSTYPE t = $1;
-                   if (t !=== common.NULL)
-                   { while (t->sibling !=== common.NULL)
+                   if (t !== common.NULL)
+                   { while (t->sibling !== common.NULL)
                         t = t->sibling;
                      t->sibling = $3;
                      $$ = $1; }

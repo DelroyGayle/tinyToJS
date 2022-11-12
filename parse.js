@@ -1,42 +1,30 @@
 /****************************************************/
-/* File: parse.c                                    */
+/* File: parse.js                                   */
 /* The parser implementation for the TINY compiler  */
 /* Compiler Construction: Principles and Practice   */
 /* Kenneth C. Louden                                */
 /****************************************************/
 
-// Shared and Globl Variables
+/*
+   A token is generated via the Parsing process and kept in a tree structure.
+   The structure of each tree node keeps the token information is as follows:
+   1) Up to 'MAXCHILDREN = 3' children      ==> .child[0-2]
+   2) A sibling                             ==> .sibling
+   3) Source Line Number                    ==> .lineno
+   4) Its 'kind' whether statement or expression	
+                                            ==> .kind, .kind.stmt, .kind.exp
+   5) The token attribute which consists of ==> .attrib 					 
+   6) The attribute's operator type         ==> .attrib.op					 
+   7) The attribute's value                 ==> .attrib.val
+   8) The attribute's name                  ==> .attrib.name
+   9) Expression type                       ==> .type
+*/
+  
+
+// Shared and Global Variables
 const common = require("./globals.js");
 
 let token; /* holds current token */
-
-/* function prototypes for recursive calls */
-/*
-static TreeNode * stmt_sequence();
-static TreeNode * statement();
-static TreeNode * if_stmt();
-static TreeNode * repeat_stmt();
-static TreeNode * assign_stmt();
-static TreeNode * read_stmt();
-static TreeNode * write_stmt();
-static TreeNode * exp();
-static TreeNode * simple_exp();
-static TreeNode * term();
-static TreeNode * factor();
-
-typedef struct treeNode
-   { struct treeNode * child[MAXCHILDREN];
-     struct treeNode * sibling;
-     int lineno;
-     NodeKind nodekind;
-     union { StmtKind stmt; ExpKind exp;} kind;
-     union { TokenType op;
-             int val;
-             char * name; } attr;
-     ExpType type; / * for type checking of exps * /
-   } TreeNode;
-
-*/
 
 function syntaxError(message) {
   fprintf(common.listing, "\n>>> ", []);
@@ -80,8 +68,9 @@ function stmt_sequence() {
         }
       }
     }
-    return t;
   }
+  return t;
+}
 
   const if_stmt = () => {
     const t = newStmtNode(common.IfK);
@@ -268,5 +257,4 @@ function stmt_sequence() {
       syntaxError("Code ends before file\n");
     }
     return t;
-  }
 }

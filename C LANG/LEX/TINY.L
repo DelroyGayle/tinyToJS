@@ -49,7 +49,7 @@ whitespace  [ \t]+
                   { c = input();
                     if (c === common.EOF) break;
                     if (c === '\n') common.lineno++;
-                  } while (c !=== '}');
+                  } while (c !== '}');
                 }
 .               {return common.ERROR;}
 

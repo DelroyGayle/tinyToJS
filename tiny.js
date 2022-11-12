@@ -5,7 +5,7 @@
 /* Kenneth C. Louden                                */
 /****************************************************/
 
-// Shared and Globl Variables
+// Shared and Global Variables
 const common = require("./globals.js");
 
 // Include process module
@@ -35,7 +35,7 @@ common.lineno = 0;
 common.EchoSource = common.FALSE;
 common.TraceScan = common.FALSE;
 common.TraceParse = common.FALSE;
-common.TraceAnalyze = common.FALSE;
+common.TraceAnalyse = common.FALSE;
 common.TraceCode = common.FALSE;
 
 common.Error = common.FALSE;
@@ -49,9 +49,9 @@ function main() {
   let pattern = /tiny(.js)?$/i;
   let tempIndex = args.findIndex((element) => pattern.test(element));
   let temp = tempIndex;
-  console.log(temp,tempIndex, args)
-  while (temp-- > 0) { // ignore prior arguments
-        args.shift();
+  while (temp-- > 0) {
+    // ignore prior arguments
+    args.shift();
   }
   if (args.length !== 2 || tempIndex < 0) {
     console.log(`usage: ${args[0]} <filename>`);
@@ -87,17 +87,17 @@ function main() {
 
     if (!NO_ANALYZE) {
       if (!common.Error) {
-        if (common.TraceAnalyze) {
+        if (common.TraceAnalyse) {
           console.log("\nBuilding Symbol Table...");
         }
         buildSymtab(syntaxTree);
 
-        if (common.TraceAnalyze) {
+        if (common.TraceAnalyse) {
           console.log("\nChecking Types...");
         }
         typeCheck(syntaxTree);
 
-        if (common.TraceAnalyze) {
+        if (common.TraceAnalyse) {
           console.log("\nType Checking Finished");
         }
       }

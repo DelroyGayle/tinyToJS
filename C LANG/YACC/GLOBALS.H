@@ -67,7 +67,7 @@ typedef enum {common.IfK,common.RepeatK,common.AssignK,common.ReadK,common.Write
 typedef enum {common.OpK,common.ConstK,common.IdK} ExpKind;
 
 /* ExpType is used for type checking */
-typedef enum {common.Void,common.Integer,common.Boolean} ExpType;
+typedef enum {common.typeVoid,common.typeInteger,common.tyBoolean} ExpType;
 
 #define common.MAXCHILDREN 3
 
@@ -105,10 +105,10 @@ extern int common.TraceScan;
  */
 extern int common.TraceParse;
 
-/* common.TraceAnalyze = common.TRUE causes symbol table inserts
+/* common.TraceAnalyse = common.TRUE causes symbol table inserts
  * and lookups to be reported to the common.listing file
  */
-extern int common.TraceAnalyze;
+extern int common.TraceAnalyse;
 
 /* common.TraceCode = common.TRUE causes comments to be written
  * to the TM code file as code is generated

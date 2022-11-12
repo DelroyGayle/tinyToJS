@@ -1,17 +1,15 @@
 /****************************************************/
-/* File: scan.c                                     */
+/* File: scan.js                                    */
 /* The scanner implementation for the TINY compiler */
 /* Compiler Construction: Principles and Practice   */
 /* Kenneth C. Louden                                */
 /****************************************************/
 
-// Shared and Globl Variables
+// function 'getToken' returns the next token in source file
+
+// Shared and Global Variables
 const common = require("./globals.js");
 const { fprintf } = require('./globals.js')
-
-#include "globals.h"
-#include "util.h"
-#include "scan.h"
 
 /* states in scanner DFA */
 const START = 0, INASSIGN = 1, INCOMMENT = 2, INNUM = 3, INID = 4, DONE = 5;
@@ -28,17 +26,28 @@ const reservedWords = {
                        write : WRITE
                       };
 
-/* lexeme of identifier or reserved word */
-let tokenString; // [MAXTOKENLEN+1];
+/*    
+   'MAXTOKENLEN' is the maximum size of a token
+   MAXTOKENLEN = 40
+
+   lexeme of identifier or reserved word */
+let tokenString; // A String - maximum length MAXTOKENLEN - 1
 
 /* BUFLEN = length of the input buffer for
    source code lines */
 const BUFLEN = 256;
 
-const lineBuf = []; // [BUFLEN]; /* holds the current line */
+let lineBuf = []; /* holds the current line  - Maximum length: BUFLEN */
 let linepos = 0; /* current position in LineBuf */
 let bufsize = 0; /* current size of buffer string */
 let EOF_flag = common.FALSE; /* corrects ungetNextChar behaviour on EOF */
+
+const switchScanTable = {'=' : common.EQ,     '<' : common.LT, 
+                         '+' : common.PLUS,   '-' : common.MINUS,
+                         '*' : common.TIMES,  '/' : common.OVER,
+                         '(' : common.LPAREN, ')':  common.RPAREN,
+                         ';' : common.SEMI
+                        };
 
 /*
     fgets( str, count );
@@ -48,9 +57,9 @@ let EOF_flag = common.FALSE; /* corrects ungetNextChar behaviour on EOF */
 */
 function fgets(count) {
      if (!common.theReadData.length) {
-          return ["", common.EOF];
+          return [[], common.EOF];
      }
-     return [common.theReadLines.shift().slice(0,count), common.TRUE];
+     return [common.theReadLines.shift().slice(0,count).split(''), common.TRUE];
 }
 
 /* getNextChar fetches the next non-blank character
@@ -62,7 +71,7 @@ if (linepos >= bufsize) {
     let [lineBuf, result] = fgets(BUFLEN);
     if ( result === common.TRUE) {
           if (common.EchoSource) {
-                    fprintf(common.listing,"%4d: %s",common.lineno,lineBuf);
+                    fprintf(common.listing,"%4d: %s",[common.lineno,lineBuf]);
           }
       bufsize = lineBuf.length;
       linepos = 0;
@@ -85,10 +94,67 @@ function ungetNextChar()
 }
 
 /* lookup an identifier to see if it is a reserved word */
-function reservedLookup (s)
+function reservedLookup(s)
 { 
   return reservedWords[s] ?? common.ID;
 }
+
+/* holds current token to be returned */
+ let currentToken;
+/* current state - always begins at START */
+ let state;
+ /* flag to indicate save to tokenString */
+ let save;
+
+ function handleComment() {
+         save = common.FALSE;
+         if (c === common.EOF) {
+           state = DONE;
+           currentToken = common.ENDFILE;
+         } else if (c === '}') {
+                                  state = START;
+                              }
+ }
+
+ function handleAssignment() {
+         state = DONE;
+         if (c === '=') {
+            currentToken = common.ASSIGN;
+         } else {
+           /* backup in the input */
+           ungetNextChar();
+           save = common.FALSE;
+           currentToken = common.ERROR;
+         }
+ }
+
+ function handleNumber() {
+         if (!isdigit(c)) {
+           /* backup in the input */
+           ungetNextChar();
+           save = common.FALSE;
+           state = DONE;
+           currentToken = common.NUM;
+         }
+ }
+
+ function handleIdentifier() {
+         if (!isalpha(c)) {
+           /* backup in the input */
+           ungetNextChar();
+           save = common.FALSE;
+           state = DONE;
+           currentToken = common.ID;
+         }
+ }
+
+  // Alternative to SWITCH Statement
+ const chooseScanAction = {};
+ chooseScanAction[INCOMMENT.toString()] = handleComment;
+ chooseScanAction[INASSIGN.toString()]  = handleAssignment;
+ chooseScanAction[INNUM.toString()]     = handleNumber;
+ chooseScanAction[INID.toString()]      = handleIdentifier;
+
 
 /****************************************/
 /* the primary function of the scanner  */
@@ -101,123 +167,64 @@ function reservedLookup (s)
 function getToken() {
    /* index for storing into tokenString */
    let tokenStringIndex = 0;
-   /* holds current token to be returned */
-   let currentToken;
+       tokenString = "",
+       stateToString;
+      
    /* current state - always begins at START */
-   let state = START;
-   /* flag to indicate save to tokenString */
-   let save;
-   while (state != DONE)
-   { c = getNextChar();
+   state = START;
+   while (state !== DONE)
+   { 
+     const c = getNextChar();
      save = common.TRUE;
-     switch (state)
-     { case START:
-         if (isdigit(c))
-           state = INNUM;
-         else if (isalpha(c))
+     
+     //switch (state)
+     if (state === START) {
+         if (isdigit(c)) {
+            state = INNUM;
+         }
+         else if (isalpha(c)) {
            state = INID;
-         else if (c == ':')
+         }
+         else if (c === ':') {
            state = INASSIGN;
-         else if ((c == ' ') || (c == '\t') || (c == '\n'))
+         }
+         else if ((c === ' ') || (c === '\t') || (c === '\n')) {
            save = common.FALSE;
-         else if (c == '{')
-         { save = common.FALSE;
+         }
+         else if (c === '{') {
+           save = common.FALSE;
            state = INCOMMENT;
-         }
-         else
-         { state = DONE;
-           switch (c)
-           { case common.EOF:
-               save = common.FALSE;
-               currentToken = common.ENDFILE;
-               break;
-             case '=':
-               currentToken = common.EQ;
-               break;
-             case '<':
-               currentToken = common.LT;
-               break;
-             case '+':
-               currentToken = common.PLUS;
-               break;
-             case '-':
-               currentToken = common.MINUS;
-               break;
-             case '*':
-               currentToken = common.TIMES;
-               break;
-             case '/':
-               currentToken = common.OVER;
-               break;
-             case '(':
-               currentToken = common.LPAREN;
-               break;
-             case ')':
-               currentToken = common.RPAREN;
-               break;
-             case ';':
-               currentToken = common.SEMI;
-               break;
-             default:
-               currentToken = common.ERROR;
-               break;
+         } else {
+                 state = DONE;
+                 if (c === common.EOF) {
+                      save = common.FALSE;
+                      currentToken = common.ENDFILE;
+                 } else {
+                      currentToken = c in switchScanTable ? switchScanTable[c] : common.ERROR;
+                        }
            }
-         }
-         break;
-       case INCOMMENT:
-         save = common.FALSE;
-         if (c == common.EOF)
-         { state = DONE;
-           currentToken = common.ENDFILE;
-         }
-         else if (c == '}') state = START;
-         break;
-       case INASSIGN:
-         state = DONE;
-         if (c == '=')
-           currentToken = common.ASSIGN;
-         else
-         { /* backup in the input */
-           ungetNextChar();
-           save = common.FALSE;
-           currentToken = common.ERROR;
-         }
-         break;
-       case INNUM:
-         if (!isdigit(c))
-         { /* backup in the input */
-           ungetNextChar();
-           save = common.FALSE;
-           state = DONE;
-           currentToken = common.NUM;
-         }
-         break;
-       case INID:
-         if (!isalpha(c))
-         { /* backup in the input */
-           ungetNextChar();
-           save = common.FALSE;
-           state = DONE;
-           currentToken = common.ID;
-         }
-         break;
-       case DONE:
-       default: /* should never happen */
-         fprintf(listing,"Scanner Bug: state= %d\n",state);
-         state = DONE;
-         currentToken = common.ERROR;
-         break;
+
+      } else if ((stateToString = state.toString()) in chooseScanAction) {
+              chooseScanAction[stateToStr]()
+      } else { /* e.g. state = DONE
+                       should never happen */
+              fprintf(listing,"Scanner Bug: state= %d\n",[state]);
+              state = DONE;
+              currentToken = common.ERROR;
      }
-     if ((save) && (tokenStringIndex <= MAXTOKENLEN))
-       tokenString[tokenStringIndex++] = (char) c;
-     if (state == DONE)
-     { tokenString[tokenStringIndex] = '\0';
-       if (currentToken == common.ID)
-         currentToken = reservedLookup(tokenString);
+
+     if (save && tokenStringIndex <= MAXTOKENLEN) {
+              tokenString += c;
+              tokenStringIndex++;
+              if (state === DONE) {
+                if (currentToken === common.ID) {
+                        currentToken = reservedLookup(tokenString);
+                }
+              }
      }
    }
    if (TraceScan) {
-     fprintf(listing,"\t%d: ",lineno);
+     fprintf(listing,"\t%d: ",[common.lineno]);
      printToken(currentToken,tokenString);
    }
    return currentToken;
