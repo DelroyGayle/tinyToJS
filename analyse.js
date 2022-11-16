@@ -25,7 +25,7 @@
  * syntax tree traversal routine:
  * it applies preProc in preorder and postProc 
  * in postorder to tree pointed to by t
- */
+*/
 function traverse( t, preProc, postProc) { 
     if (t !== common.NULL && t !== undefined) {
         preProc(t);
@@ -40,7 +40,7 @@ function traverse( t, preProc, postProc) {
 /* nullProc is a do-nothing procedure to 
  * generate preorder-only or postorder-only
  * traversals from traverse
- */
+*/
 function nullProc(t)
 { 
 }
@@ -76,7 +76,7 @@ function addToSymbolTable (t) {
 /* Procedure insertNode inserts 
  * identifiers stored in t into 
  * the symbol table 
- */
+*/
 function insertNode(t)
 { 
     let theNodeKind = t.nodekind;
@@ -95,7 +95,7 @@ function insertNode(t)
 
 /* Function buildSymtab constructs the symbol 
  * table by preorder traversal of the syntax tree
- */
+*/
 function buildSymtab(syntaxTree)
 { traverse(syntaxTree,insertNode,nullProc);
   if (TraceAnalyse)
@@ -175,7 +175,7 @@ function checkNode(t) {
 
 /* Procedure typeCheck performs type checking 
  * by a postorder syntax tree traversal
- */
+*/
 function typeCheck(syntaxTree)
 { 
     traverse(syntaxTree,nullProc,checkNode);

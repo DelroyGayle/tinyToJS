@@ -7,7 +7,10 @@
 
 // Shared and Global Variables
 const common = require("./globals.js");
-
+const Scan = require("./scan.js");
+const Parse = require("./parse.js");
+console.log(1000,common)
+console.log(common.IF)
 // Include process module
 const process = require("process");
 // https://www.geeksforgeeks.org/node-js-process-argv-property/
@@ -15,10 +18,8 @@ const fs = require("fs");
 // https://nodejs.org/api/fs.html
 // https://www.w3schools.com/nodejs/nodejs_filesystem.asp
 
-const parse = require("./parse.js");
-
 /* set NO_PARSE to TRUE to get a scanner-only compiler */
-const NO_PARSE = common.TRUE;
+const NO_PARSE = common.FALSE;
 
 /* set NO_ANALYZE to TRUE to get a parser-only compiler */
 const NO_ANALYZE = common.TRUE;
@@ -41,6 +42,7 @@ common.TraceCode = common.FALSE;
 common.Error = common.FALSE;
 
 function main() {
+  console.log(common.FALSE, common.IF)
   let syntaxTree;
   let pgm; /* source code file name */
 
@@ -64,8 +66,7 @@ function main() {
   common.source = pgm;
 
   // Read the entire input file and split it up into the lines
-  let theReadData;
-  fs.readFileSync(pgm, "utf8", function (err, theReadData) {
+  const theReadData = fs.readFileSync(pgm, "utf8", function (err, _) {
     if (err) {
       console.log(`File ${pgm} not found`);
       process.exit(1);
@@ -74,12 +75,14 @@ function main() {
   common.theReadLines = theReadData.split(/\r?\n/);
 
   common.listing = common.toScreen; /* send listing to screen */
-
+console.log(common)
+  console.log(common.FALSE, common.IF);
   console.log(`\nTINY COMPILATION: ${pgm}`);
   if (NO_PARSE) {
-    while (getToken() !== common.ENDFILE);
+    while (Scan.getToken() !== common.ENDFILE);
+    // SCAN ONLY hence Empty Statement
   } else {
-    syntaxTree = parse();
+    syntaxTree = Parse.parse();
     if (common.TraceParse) {
       console.log("\nSyntax tree:");
       printTree(syntaxTree);

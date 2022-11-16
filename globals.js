@@ -8,12 +8,15 @@
 
 // These are all CONSTANTS :-
 
-const common = {
+module.exports = {
   FALSE: 0,
   TRUE: 1,
 
   /* MAXRESERVED = the number of reserved words */
   MAXRESERVED: 8,
+
+  /* MAXTOKENLEN is the maximum size of a token */
+  MAXTOKENLEN: 40,
 
   /* book-keeping tokens */
   ENDFILE: 0,
@@ -69,6 +72,9 @@ const common = {
   EOF: -1,
   toScreen: ":screen:",
 
+  // The Symbol Table
+  symbolTable: new Map(),
+
   // These are all MUTABLE :-
 
   source: null /* source code text file */,
@@ -116,7 +122,17 @@ const common = {
   theReadLines: null,
 
   /* counter for variable memory locations */
-   location: 0,
+  location: 0,
+
+  /* Utility Functions */
+  fprintf: (mode, string, array = []) => {
+    const result = vsprintf(string, array);
+    if (mode === toScreen) {
+      process.stdout.write(result);
+    } else {
+      fs.write(mode, result);
+    }
+  },
 };
 
 const sprintf = require("sprintf-js").sprintf,
@@ -128,9 +144,26 @@ const fprintf = (mode, string, array = []) => {
   if (mode === toScreen) {
     process.stdout.write(result);
   } else {
-    fs.write(handle, result);
+    fs.write(mode, result);
   }
 };
 
-module.exports = common;
-exports.fprintf = fprintf;
+function fprintf2(mode, string, array = [])  {
+  const result = vsprintf(string, array);
+  if (mode === toScreen) {
+    process.stdout.write(result);
+  } else {
+    fs.write(mode, result);
+  }
+};
+
+// module.exports = common;
+// exports.fprintf = fprintf;
+// exports.fprintf2 = fprintf2;
+
+/*
+module.exports = {
+  fprintf,
+  fprintf2,
+};
+*/

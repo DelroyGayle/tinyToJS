@@ -23,11 +23,17 @@
 
 // Shared and Global Variables
 const common = require("./globals.js");
+ console.log(common.IF, common.FALSE, common.TRUE);
+// const Scan = require("./scan.js")
+const { getToken } = require("./scan.js");
+const { fprintf } = require("./globals.js");
 
 let token; /* holds current token */
 
 function syntaxError(message) {
-  fprintf(common.listing, "\n>>> ", []);
+  console.log(common.fprintf)
+  console.log(fprintf)
+  fprintf2(common.listing, "\n>>> ", []);
   fprintf(common.listing, "Syntax error at line %d: %s", [
     common.lineno,
     message,
@@ -135,6 +141,8 @@ function stmt_sequence() {
 
   // Alternative to SWITCH Statement
   const chooseStatement = {};
+  console.log(common)
+  console.log(common.IF, common.FALSE, common.TRUE)
   chooseStatement[common.IF.toString()] = if_stmt;
   chooseStatement[common.REPEAT.toString()] = repeat_stmt;
   chooseStatement[common.ID.toString()] = assign_stmt;
@@ -258,3 +266,7 @@ function stmt_sequence() {
     }
     return t;
 }
+
+module.exports = {
+  parse,
+};

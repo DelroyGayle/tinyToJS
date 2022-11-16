@@ -8,22 +8,26 @@
 // function 'getToken' returns the next token in source file
 
 // Shared and Global Variables
-const common = require("./globals.js");
-const { fprintf } = require('./globals.js')
+// const common = require("./globals.js");
+const common = require('./globals.js')
+console.log(common)
+console.log("ABC",common.IF, common.END)
+console.log("DEF", common["IF"], common["END"])
+console.log(common)
 
 /* states in scanner DFA */
 const START = 0, INASSIGN = 1, INCOMMENT = 2, INNUM = 3, INID = 4, DONE = 5;
 
 /* lookup table of reserved words */
 const reservedWords = {
-                       if : common.IF, 
-                       then : common.THEN,
-                       else : common.ELSE,
-                       end : common.END,
+                       if :     common.IF, 
+                       then :   common.THEN,
+                       else :   common.ELSE,
+                       end :    common.END,
                        repeat : common.REPEAT,
-                       until : common.UNTIL,
-                       read : READ,
-                       write : WRITE
+                       until :  common.UNTIL,
+                       read :   common.READ,
+                       write :  common.WRITE
                       };
 
 /*    
@@ -56,7 +60,7 @@ const switchScanTable = {'=' : common.EQ,     '<' : common.LT,
     If 'common.theReadLines' is empty, return a null string and 'common.EOF'
 */
 function fgets(count) {
-     if (!common.theReadData.length) {
+     if (!common.theReadLines.length) {
           return [[], common.EOF];
      }
      return [common.theReadLines.shift().slice(0,count).split(''), common.TRUE];
@@ -67,7 +71,7 @@ function fgets(count) {
    exhausted */
 function getNextChar() {
 if (linepos >= bufsize) {
-    lineno++;
+    common.lineno++;
     let [lineBuf, result] = fgets(BUFLEN);
     if ( result === common.TRUE) {
           if (common.EchoSource) {
@@ -106,7 +110,7 @@ function reservedLookup(s)
  /* flag to indicate save to tokenString */
  let save;
 
- function handleComment() {
+ function handleComment(c) {
          save = common.FALSE;
          if (c === common.EOF) {
            state = DONE;
@@ -116,7 +120,7 @@ function reservedLookup(s)
                               }
  }
 
- function handleAssignment() {
+ function handleAssignment(c) {
          state = DONE;
          if (c === '=') {
             currentToken = common.ASSIGN;
@@ -128,7 +132,7 @@ function reservedLookup(s)
          }
  }
 
- function handleNumber() {
+ function handleNumber(c) {
          if (!isdigit(c)) {
            /* backup in the input */
            ungetNextChar();
@@ -138,7 +142,7 @@ function reservedLookup(s)
          }
  }
 
- function handleIdentifier() {
+ function handleIdentifier(c) {
          if (!isalpha(c)) {
            /* backup in the input */
            ungetNextChar();
@@ -160,13 +164,20 @@ function reservedLookup(s)
 /* the primary function of the scanner  */
 /****************************************/
 
+function isdigit(c) {
+    return /^[0-9]$/.test(c);
+}
+
+function isalpha(c) {
+  return /^[A-Za-z]$/.test(c);
+}
 
 /* function getToken returns the 
  * next token in source file
  */
 function getToken() {
    /* index for storing into tokenString */
-   let tokenStringIndex = 0;
+   let tokenStringIndex = 0,
        tokenString = "",
        stateToString;
       
@@ -205,7 +216,7 @@ function getToken() {
            }
 
       } else if ((stateToString = state.toString()) in chooseScanAction) {
-              chooseScanAction[stateToStr]()
+              chooseScanAction[stateToString](c)
       } else { /* e.g. state = DONE
                        should never happen */
               fprintf(listing,"Scanner Bug: state= %d\n",[state]);
@@ -213,7 +224,7 @@ function getToken() {
               currentToken = common.ERROR;
      }
 
-     if (save && tokenStringIndex <= MAXTOKENLEN) {
+     if (save && tokenStringIndex <= common.MAXTOKENLEN) {
               tokenString += c;
               tokenStringIndex++;
               if (state === DONE) {
@@ -223,10 +234,15 @@ function getToken() {
               }
      }
    }
-   if (TraceScan) {
+   if (common.TraceScan) {
      fprintf(listing,"\t%d: ",[common.lineno]);
      printToken(currentToken,tokenString);
    }
    return currentToken;
 } /* end getToken */
 
+module.exports = {
+    getToken,
+}
+
+ 
